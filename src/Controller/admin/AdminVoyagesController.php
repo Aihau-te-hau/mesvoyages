@@ -44,6 +44,7 @@ class AdminVoyagesController extends AbstractController {
         return $this->redirectToRoute('admin.voyages');
     }
     
+    /**
     #[Route('/admin/edit/{id}', name: 'admin.voyage.edit')]
     public function edit(int $id): Response {
         $visite = $this->repository->find($id);
@@ -53,4 +54,6 @@ class AdminVoyagesController extends AbstractController {
             'formvisite' => $formVisite->createView()
         ]);
     }
+     * 
+     */
 }
