@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 namespace App\Tests\Validations;
 
@@ -28,10 +28,14 @@ class VisiteValidationsTest extends KernelTestCase {
      * (nombre d'éléments du tableau $error) avec le nombre d'erreurs attendu (valeur entière)
      */
     public function testValidNoteVisite() {
-        $visite = $this->getVisite()->setNote(10);
-        $this->assertErrors($visite, 0);
+        $this->assertErrors($this->getVisite()->setNote(10), 0, 
+                "10 devrait réussir");
+        $this->assertErrors($this->getVisite()->setNote(0), 0, 
+                "0 devrait réussir");
+        $this->assertErrors($this->getVisite()->setNote(20), 0, 
+                "20 devrait réussir");
     }
-    
+
     /**
      * fonction gérant l'appel au kernel et à assertCount
      * @param Visite $visite
@@ -49,18 +53,49 @@ class VisiteValidationsTest extends KernelTestCase {
      * test d'intégration d'une note invalide
      */
     public function testNonValidNoteVisite() {
-        $visite = $this->getVisite()->setNote(21);
-        $this->assertErrors($visite, 1);
+        $this->assertErrors($this->getVisite()->setNote(21), 1,
+                "21 devrait échouer");
+        $this->assertErrors($this->getVisite()->setNote(-1), 1,
+                "-1 devrait échouer");
+        $this->assertErrors($this->getVisite()->setNote(-5), 1,
+                "-5 devrait échouer");
+        $this->assertErrors($this->getVisite()->setNote(25), 1,
+                "25 devrait échouer");
     }
     
     /**
      * test de comparaison entre tempmin et tempmax
      * on veut tempmax > tempmin
+     * on veut tester une réaction invalide
      */
     public function testNonValidTempmaxVisite() {
-        $visite = $this->getVisite()
-                ->setTempmin(20)
-                ->setTempmax(18);
-        $this->assertErrors($visite, 1, "min=20, max=18 devrait échouer");
+        $this->assertErrors($this->getVisite()->setTempmin(20)
+                ->setTempmax(18), 1, "min=20, max=18 devrait échouer");
+        $this->assertErrors($this->getVisite()->setTempmin(20)
+                ->setTempmax(20), 1, "min=20, max=20 devrait échouer");
+    }
+    
+    /**
+     * test de comparaison entre tempmin et tempmax
+     * on veut tester une réaction valide
+     */
+    public function testValidTempmaxVisite() {
+        $this->assertErrors($this->getVisite()->setTempmin(18)
+                ->setTempmax(20), 0, "min=18, max=20 devrait réussir");
+        $this->assertErrors($this->getVisite()->setTempmin(19)
+                ->setTempmax(20), 0, "min=19, max=20 devrait réussir");
+    }
+    
+    /**
+     * test de vérification de la date de création
+     * doit être antérieur ou à la date d'aujourd'hui
+     */
+    public function testNonValidDatecreationVisite() {
+        $demain = (new \DateTime())->add(new \DateInterval("P1D"));
+        $this->assertErrors($this->getVisite()->setDatecreation($demain),
+                1, "demain devrait échouer");
+        $plustard = (new \DateTime())->add(new \DateInterval("P5D"));
+        $this->assertErrors($this->getVisite()->setDatecreation($plustard),
+                1, "plustard devrait échouer");
     }
 }
